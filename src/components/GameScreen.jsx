@@ -24,6 +24,8 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
   const [gameWon, setGameWon] = useState(false);
   // 添加伤害提示状态
   const [damageAlert, setDamageAlert] = useState({ open: false, message: '', severity: 'error' });
+  // 添加控制禁用状态
+  const [disableControls, setDisableControls] = useState(false);
 
   // 当playerHealth改变时更新本地状态
   useEffect(() => {
@@ -103,7 +105,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
 
   // 处理键盘输入
   const handleKeyDown = useCallback((e) => {
-    if (gameOver || gameWon) return;
+    if (gameOver || gameWon || disableControls) return;
 
     const { row, col } = playerPosition;
     let newRow = row;
@@ -137,7 +139,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
         setGameWon(true);
       }
     }
-  }, [playerPosition, gameOver, gameWon]);
+  }, [playerPosition, gameOver, gameWon, disableControls]);
 
   // 计算伤害
   const calculateDamage = (row, col) => {
@@ -161,7 +163,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
 
     // 计算实际伤害
     const baseDamage = cell.level * 12 * (3**cell.level);
-    let actualDamage = Math.max(0, (baseDamage - (resistance * 12)) * (1-(2**-(5-resistance))*resistance));
+    let actualDamage = Math.max(0, (baseDamage - (resistance * 12)) * (1-(2**-Math.max(0,(8-resistance)))*resistance));
     actualDamage = Math.round(actualDamage);
 
     if (actualDamage > 0) {
@@ -185,10 +187,15 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
       // 检查是否游戏结束
       if (newHealth <= 0) {
         setGameOver(true);
-        // 不再设置对话框，而是直接返回选择界面并调用游戏结束处理
-        returnToSelection();
-        // 直接通知父组件处理游戏结束逻辑
-        handleGameOver();
+        // 禁用控制
+        setDisableControls(true);
+        // 先显示伤害提示，延迟一段时间再结束游戏
+        setTimeout(() => {
+          // 不再设置对话框，而是直接返回选择界面并调用游戏结束处理
+          returnToSelection();
+          // 直接通知父组件处理游戏结束逻辑
+          handleGameOver();
+        }, 1500); // 延迟1.5秒，让玩家有时间看到致命伤害提示
       }
     } else if (resistance >= cell.level) {
       // 完全抵消伤害的提示
@@ -312,7 +319,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
       <Paper sx={{ p: 2, mb: 2}}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body1">
-            使用 W（上）S（下）A（左）D（右）键移动角色，到达右上角的终点。不同地形会造成伤害，请小心！
+            使用 W（上）S（下）A（左）D（右）键移动角色，到达终点。
           </Typography>
         </Box>
       </Paper>
@@ -370,7 +377,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
                     <span className="cell-content">{getCellContent(cell)}</span>
                     <span className="cell-icon">{getCellIcon(cell)}</span>
                     {playerPosition.row === rowIndex && playerPosition.col === colIndex && (
-                        <img src="src/assets/113136114_p0.png" alt="player"
+                        <img src="/assets/113136114_p0.png" alt="player"
                         style={{position:'absolute',width:'80px',height:'80px',borderRadius:'10px'}}/>
                     )}
                     {/*<img src="src/assets/IMG_1462.GIF" alt="123" style={{width:'110px', height:'110px'}}/>*/}
@@ -400,7 +407,7 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
         <DialogContent>
           <Typography>
             恭喜你成功到达终点，
-            生命值恢复了500
+            生命值恢复了300
           </Typography>
         </DialogContent>
         <DialogActions>

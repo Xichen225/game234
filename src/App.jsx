@@ -54,21 +54,21 @@ const initialAchievements = {
 function App() {
   // 游戏状态
   const [gameStarted, setGameStarted] = useState(false);
-  
+
   // 添加游戏失败对话框状态
   const [showGameOverDialog, setShowGameOverDialog] = useState(false);
-  
+
   // 添加生命值状态到App组件
   const [playerHealth, setPlayerHealth] = useState(() => {
     const savedHealth = localStorage.getItem('playerHealth');
     return savedHealth ? parseInt(savedHealth) : 1000;
   });
-  
+
   // 监听生命值变化并保存
   useEffect(() => {
     localStorage.setItem('playerHealth', playerHealth.toString());
   }, [playerHealth]);
-  
+
   // 游戏结束处理函数
   const handleGameOver = () => {
     // 设置游戏结束状态到localStorage以确保刷新页面时能恢复状态
@@ -76,13 +76,13 @@ function App() {
     // 显示游戏结束对话框
     setShowGameOverDialog(true);
   };
-  
+
   // 初始检查游戏结束状态
   useEffect(() => {
     // 检查localStorage中是否有游戏结束标志，并且确认生命值是否真的为0
     const isGameOver = localStorage.getItem('gameOverState') === 'true';
     const health = parseInt(localStorage.getItem('playerHealth') || '1000');
-    
+
     if (isGameOver || health <= 0) {
       // 清除游戏结束标志
       localStorage.removeItem('gameOverState');
@@ -90,35 +90,35 @@ function App() {
       setShowGameOverDialog(true);
     }
   }, []);
-  
+
   // 装备数据库（所有可用装备的完整状态）
   const [equipmentDatabase, setEquipmentDatabase] = useState(() => {
     // 从本地存储加载装备数据
     const savedEquipment = localStorage.getItem('equipmentDatabase');
     return savedEquipment ? JSON.parse(savedEquipment) : initialEquipmentDatabase;
   });
-  
+
   // 当前选择的装备
   const [selectedEquipment, setSelectedEquipment] = useState({
     head: null,
     body: null,
     feet: null
   });
-  
+
   // 当前选择的难度
   const [selectedDifficulty, setSelectedDifficulty] = useState(() => {
     // 从本地存储加载上次选择的难度
     const savedDifficulty = localStorage.getItem('selectedDifficulty');
     return savedDifficulty || DIFFICULTY_LEVELS.EASY;
   });
-  
+
   // 完成勋章
   const [achievements, setAchievements] = useState(() => {
     // 从本地存储加载完成勋章数据
     const savedAchievements = localStorage.getItem('achievements');
     return savedAchievements ? JSON.parse(savedAchievements) : initialAchievements;
   });
-  
+
   // 地图数据，存储困难和高难模式的固定地图
   const [mapData, setMapData] = useState(null);
   const [hardModeMap, setHardModeMap] = useState(() => {
@@ -129,39 +129,39 @@ function App() {
     const savedMap = localStorage.getItem('expertModeMap');
     return savedMap ? JSON.parse(savedMap) : null;
   });
-  
+
   // 保存装备数据到本地存储
   useEffect(() => {
     localStorage.setItem('equipmentDatabase', JSON.stringify(equipmentDatabase));
   }, [equipmentDatabase]);
-  
+
   // 保存完成勋章数据到本地存储
   useEffect(() => {
     localStorage.setItem('achievements', JSON.stringify(achievements));
   }, [achievements]);
-  
+
   // 保存选择的难度到本地存储
   useEffect(() => {
     localStorage.setItem('selectedDifficulty', selectedDifficulty);
   }, [selectedDifficulty]);
-  
+
   // 保存困难和高难模式的地图数据
   useEffect(() => {
     if (hardModeMap) {
       localStorage.setItem('hardModeMap', JSON.stringify(hardModeMap));
     }
   }, [hardModeMap]);
-  
+
   useEffect(() => {
     if (expertModeMap) {
       localStorage.setItem('expertModeMap', JSON.stringify(expertModeMap));
     }
   }, [expertModeMap]);
-  
+
   // 处理难度变更
   const handleDifficultyChange = (newDifficulty) => {
     setSelectedDifficulty(newDifficulty);
-    
+
     // 根据不同难度设置地图
     if (newDifficulty === DIFFICULTY_LEVELS.HARD) {
       // 困难模式：使用保存的地图或生成新地图
@@ -186,12 +186,12 @@ function App() {
       setMapData(generateMap(newDifficulty));
     }
   };
-  
+
   // 开始游戏
   const startGame = () => {
     setGameStarted(true);
   };
-  
+
   // 返回装备选择界面
   const returnToSelection = () => {
     setGameStarted(false);
@@ -201,26 +201,26 @@ function App() {
   const updateEquipmentExp = (slot, itemId, expGained) => {
     setEquipmentDatabase(prevDatabase => {
       const newDatabase = {...prevDatabase};
-      
+
       // 找到要更新的装备
       const itemIndex = newDatabase[slot].findIndex(item => item.id === itemId);
       if (itemIndex === -1) return prevDatabase;
-      
+
       const item = {...newDatabase[slot][itemIndex]};
-      
+
       // 增加经验值
       item.exp += expGained;
-      
+
       // 检查是否升级
       if (item.exp >= item.expToNextLevel) {
         item.level += 1;
         item.exp = item.exp - item.expToNextLevel;
         item.expToNextLevel = Math.floor(item.expToNextLevel * 1.5); // 下一级所需经验值增加
       }
-      
+
       // 更新数据库中的装备
       newDatabase[slot][itemIndex] = item;
-      
+
       return newDatabase;
     });
   };
@@ -262,10 +262,10 @@ function App() {
     const rows = 5;
     const cols = 6;
     const map = [];
-    
+
     // 根据难度获取地块等级概率
     const { levelProbabilities } = getDifficultySettings(difficulty);
-    
+
     for (let row = 0; row < rows; row++) {
       const currentRow = [];
       for (let col = 0; col < cols; col++) {
@@ -279,7 +279,7 @@ function App() {
           });
         } else {
           const type = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
-          
+
           // 根据概率决定地块等级
           const randomValue = Math.random();
           let level;
@@ -290,13 +290,13 @@ function App() {
           } else {
             level = 3;
           }
-          
+
           currentRow.push({ type, level });
         }
       }
       map.push(currentRow);
     }
-    
+
     return map;
   };
 
@@ -311,25 +311,25 @@ function App() {
   // 在游戏胜利后刷新地图并更新装备经验值和完成勋章
   const handleGameVictory = () => {
     // 恢复500点生命值，但不超过1000
-    const newHealth = Math.min(playerHealth + 500, 1000);
+    const newHealth = Math.min(playerHealth + 300, 1000);
     setPlayerHealth(newHealth);
-    
+
     // 更新完成勋章（累加通关次数）
     setAchievements(prev => ({
       ...prev,
       [selectedDifficulty]: (prev[selectedDifficulty] || 0) + 1
     }));
-    
+
     // 临时存储需要更新的装备ID，用于后续更新selectedEquipment
     const updatedEquipmentIds = {
       head: selectedEquipment.head?.id,
       body: selectedEquipment.body?.id,
       feet: selectedEquipment.feet?.id
     };
-    
+
     // 根据难度获取经验值奖励
     const { expReward } = getDifficultySettings(selectedDifficulty);
-    
+
     // 所有使用的装备获得经验值
     if (selectedEquipment.head) {
       updateEquipmentExp('head', selectedEquipment.head.id, expReward);
@@ -340,7 +340,7 @@ function App() {
     if (selectedEquipment.feet) {
       updateEquipmentExp('feet', selectedEquipment.feet.id, expReward);
     }
-    
+
     // 更新selectedEquipment，确保它引用最新的装备数据
     setTimeout(() => {
       const updatedSelectedEquipment = {
@@ -348,28 +348,47 @@ function App() {
         body: updatedEquipmentIds.body ? equipmentDatabase.body.find(item => item.id === updatedEquipmentIds.body) : null,
         feet: updatedEquipmentIds.feet ? equipmentDatabase.feet.find(item => item.id === updatedEquipmentIds.feet) : null
       };
-      
+
       setSelectedEquipment(updatedSelectedEquipment);
     }, 0);
-    
+
     // 生成新地图
     const newMap = generateMap();
     setMapData(newMap);
-    
+
     // 如果是困难或高难模式，更新固定地图
     if (selectedDifficulty === DIFFICULTY_LEVELS.HARD) {
       setHardModeMap(newMap);
     } else if (selectedDifficulty === DIFFICULTY_LEVELS.EXPERT) {
       setExpertModeMap(newMap);
     }
-    
+
     // 返回装备选择界面
     setGameStarted(false);
   };
 
   // 重置所有装备数据和完成勋章（开发测试用）
   const resetData = () => {
-    setEquipmentDatabase(initialEquipmentDatabase);
+    // 创建一个全新的装备数据副本，确保经验值被重置为0
+    const freshEquipmentDatabase = {
+      head: [
+        { id: 'head1', name: '火焰头盔', resistance: 'fire', baseValue: 3, level: 1, exp: 0, expToNextLevel: 100, image: '🔥' },
+        { id: 'head2', name: '风暴头盔', resistance: 'storm', baseValue: 3, level: 1, exp: 0, expToNextLevel: 100, image: '🌪️' },
+        { id: 'head3', name: '寒冰头盔', resistance: 'ice', baseValue: 3, level: 1, exp: 0, expToNextLevel: 100, image: '❄️' }
+      ],
+      body: [
+        { id: 'body1', name: '火焰护甲', resistance: 'fire', baseValue: 2, level: 1, exp: 0, expToNextLevel: 100, image: '🔥' },
+        { id: 'body2', name: '风暴护甲', resistance: 'storm', baseValue: 2, level: 1, exp: 0, expToNextLevel: 100, image: '🌪️' },
+        { id: 'body3', name: '寒冰护甲', resistance: 'ice', baseValue: 2, level: 1, exp: 0, expToNextLevel: 100, image: '❄️' }
+      ],
+      feet: [
+        { id: 'feet1', name: '火焰靴子', resistance: 'fire', baseValue: 1, level: 1, exp: 0, expToNextLevel: 100, image: '🔥' },
+        { id: 'feet2', name: '风暴靴子', resistance: 'storm', baseValue: 1, level: 1, exp: 0, expToNextLevel: 100, image: '🌪️' },
+        { id: 'feet3', name: '寒冰靴子', resistance: 'ice', baseValue: 1, level: 1, exp: 0, expToNextLevel: 100, image: '❄️' }
+      ]
+    };
+
+    setEquipmentDatabase(freshEquipmentDatabase);
     setAchievements(initialAchievements);
     setHardModeMap(null);
     setExpertModeMap(null);
@@ -379,17 +398,17 @@ function App() {
     localStorage.removeItem('expertModeMap');
     localStorage.removeItem('playerHealth'); // 重置玩家生命值
     localStorage.removeItem('gameOverState'); // 清除游戏结束状态
-    
+
     // 重置生命值
     setPlayerHealth(1000);
-    
+
     // 重置所选装备
     setSelectedEquipment({
       head: null,
       body: null,
       feet: null
     });
-    
+
     // 生成新地图
     setMapData(generateMap());
   };
@@ -404,7 +423,7 @@ function App() {
       } else {
         const newMap = generateMap();
         setMapData(newMap);
-        
+
         // 如果是困难或高难模式，保存地图
         if (selectedDifficulty === DIFFICULTY_LEVELS.HARD) {
           setHardModeMap(newMap);
@@ -426,7 +445,7 @@ function App() {
       <CssBaseline />
       <div className="game-container">
         {!gameStarted ? (
-          <EquipmentSelection 
+          <EquipmentSelection
             selectedEquipment={selectedEquipment}
             setSelectedEquipment={setSelectedEquipment}
             equipmentDatabase={equipmentDatabase}
@@ -442,7 +461,7 @@ function App() {
             playerHealth={playerHealth} // 传递生命值给装备选择界面
           />
         ) : (
-          <GameScreen 
+          <GameScreen
             selectedEquipment={selectedEquipment}
             mapData={mapData}
             returnToSelection={returnToSelection}
@@ -453,7 +472,7 @@ function App() {
             handleGameOver={handleGameOver}
           />
         )}
-        
+
         {/* 游戏失败对话框 */}
         <Dialog
           open={showGameOverDialog}
