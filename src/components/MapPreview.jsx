@@ -20,8 +20,8 @@ const MapPreview = ({ mapData }) => {
     } else if (cell.isEnd) {
       return '终点';
     } else {
-      const typeText = cell.type === 'fire' ? '炎热' : cell.type === 'storm' ? '风暴' : '寒冰';
-      return `${typeText}${cell.level}`;
+      // const typeText = cell.type === 'fire' ? '炎热' : cell.type === 'storm' ? '风暴' : '寒冰';
+      return `l.v.${cell.level}`;
     }
   };
 
@@ -41,10 +41,10 @@ const MapPreview = ({ mapData }) => {
   return (
     <Box>
       <Typography variant="subtitle1" gutterBottom>
-        地图由红色（炎热）、黄色（风暴）和蓝色（寒冰）三种地块组成，每种有1-3级难度。
+        选择适当的装备来抵御地块伤害，取得终点的宝藏。
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
-        选择适当的装备来抵御不同类型的地块伤害。
+        （开始游戏后通过a,w,s,d控制角色移动）
       </Typography>
 
       <Box className="game-map" sx={{ mt: 3 }}>
@@ -53,11 +53,18 @@ const MapPreview = ({ mapData }) => {
             <Paper
               key={`${rowIndex}-${colIndex}`}
               className={`map-cell ${getCellStyle(cell)}`}
-              elevation={1}
+              elevation={0}
             >
               <Box>
                 <Typography variant="caption">{getCellContent(cell)}</Typography>
-                <Typography variant="h6">{getCellIcon(cell)}</Typography>
+                {/* 地块图片显示 */}
+                {!(cell.isStart || cell.isEnd) && (
+                  <img
+                    src={`/game234/${cell.type === 'fire' ? 'r' : cell.type === 'storm' ? 'g' : 'b'}_p_${cell.level}.${cell.type === 'fire' ? (cell.level === 1 ? 'png' : 'gif') : (cell.level === 1 ? 'png' : 'gif')}`}
+                    alt={`${cell.type}${cell.level}`}
+                    style={{ width: '32px', height: '32px', display: 'block', margin: '4px auto' }}
+                  />
+                )}
               </Box>
             </Paper>
           ))

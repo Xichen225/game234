@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Box,
   Typography,
   Button,
   Card,
   CardContent,
-  CardMedia,
-  Grid,
   Paper,
   Divider,
   LinearProgress,
@@ -14,61 +12,11 @@ import {
   Tooltip,
   ToggleButtonGroup,
   ToggleButton,
-  Badge,
   Chip
 } from '@mui/material';
 import MapPreview from './MapPreview';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-
-// 装备数据
-const equipmentData = {
-  head: [
-    { id: 'head1', name: '火焰头盔', resistance: 'fire', image: '🔥' },
-    { id: 'head2', name: '风暴头盔', resistance: 'storm', image: '🌪️' },
-    { id: 'head3', name: '寒冰头盔', resistance: 'ice', image: '❄️' }
-  ],
-  body: [
-    { id: 'body1', name: '火焰护甲', resistance: 'fire', image: '🔥' },
-    { id: 'body2', name: '风暴护甲', resistance: 'storm', image: '🌪️' },
-    { id: 'body3', name: '寒冰护甲', resistance: 'ice', image: '❄️' }
-  ],
-  feet: [
-    { id: 'feet1', name: '火焰靴子', resistance: 'fire', image: '🔥' },
-    { id: 'feet2', name: '风暴靴子', resistance: 'storm', image: '🌪️' },
-    { id: 'feet3', name: '寒冰靴子', resistance: 'ice', image: '❄️' }
-  ]
-};
-
-// 随机生成地图
-const generateMap = () => {
-  const terrainTypes = ['fire', 'storm', 'ice'];
-  const rows = 5;
-  const cols = 6;
-  const map = [];
-
-  for (let row = 0; row < rows; row++) {
-    const currentRow = [];
-    for (let col = 0; col < cols; col++) {
-      // 起点和终点没有地形效果
-      if ((row === rows - 1 && col === 0) || (row === 0 && col === cols - 1)) {
-        currentRow.push({
-          type: 'normal',
-          level: 0,
-          isStart: row === rows - 1 && col === 0,
-          isEnd: row === 0 && col === cols - 1
-        });
-      } else {
-        const type = terrainTypes[Math.floor(Math.random() * terrainTypes.length)];
-        const level = Math.floor(Math.random() * 3) + 1; // 1-3级
-        currentRow.push({ type, level });
-      }
-    }
-    map.push(currentRow);
-  }
-
-  return map;
-};
 
 const EquipmentSelection = ({
   selectedEquipment,
@@ -128,12 +76,7 @@ const EquipmentSelection = ({
     return selectedEquipment.head && selectedEquipment.body && selectedEquipment.feet;
   };
 
-  // 获取抗性类型的中文名称
-  const getResistanceText = (type) => {
-    return type === 'fire' ? '炎热' : type === 'storm' ? '风暴' : '寒冰';
-  };
-
-  // 获取难度对应的颜色
+// 获取难度对应的颜色
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
       case difficultyLevels.EASY:
@@ -167,13 +110,11 @@ const EquipmentSelection = ({
 
   return (
     <Box>
-
-
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center',justifyContent: 'space-between' }}>
         <Box sx={{fontSize:24,fontWeight:'bold'}}>
-          Game Title
+        元素魔女之旅
         </Box>
-        <Box sx={{ width: '70%', position: 'relative' }}>
+        <Box sx={{ width: '50%', position: 'relative' }}>
           <LinearProgress
             variant="determinate"
             value={playerHealth / 10}
@@ -199,7 +140,7 @@ const EquipmentSelection = ({
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <Box sx={{ mb: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box>
           <ToggleButtonGroup
             value={selectedDifficulty}
@@ -258,28 +199,6 @@ const EquipmentSelection = ({
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ display: 'flex', mb: 1 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              disabled={!allEquipmentSelected()}
-              onClick={startGame}
-              sx={{ mr: 2 }}
-            >
-              开始游戏
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={refreshMap}
-              disabled={selectedDifficulty === difficultyLevels.HARD || selectedDifficulty === difficultyLevels.EXPERT}
-            >
-              换一张图
-            </Button>
-          </Box>
-        </Box>
-
         <Box>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end',mt:1 }}>
             {Object.entries(achievements).map(([difficulty, count]) => (
@@ -300,7 +219,27 @@ const EquipmentSelection = ({
             ))}
           </Box>
         </Box>
-
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', mb: 1 }}>
+            <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                disabled={!allEquipmentSelected()}
+                onClick={startGame}
+                sx={{ mr: 2 }}
+            >
+              开始游戏
+            </Button>
+            <Button
+                variant="outlined"
+                onClick={refreshMap}
+                disabled={selectedDifficulty === difficultyLevels.HARD || selectedDifficulty === difficultyLevels.EXPERT}
+            >
+              换一张图
+            </Button>
+          </Box>
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Tooltip title="重置所有数据（装备和勋章）">
             <IconButton onClick={resetData} color="secondary">
@@ -319,22 +258,24 @@ const EquipmentSelection = ({
                   key={item.id}
                   className={`option-card ${selectedEquipment.head?.id === item.id ? 'selected' : ''}`}
                   onClick={() => selectEquipment('head', item)}
-                  sx={{ width: 100, minHeight: 120 }}
+                  sx={{ width: 100, height: 170, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                 >
-                  <CardContent sx={{ p: 1 }}>
-                    <Typography variant="body2" fontWeight="bold">
-                      {item.name} Lv.{item.level}
-                    </Typography>
-                    <Typography variant="caption">
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <img
+                      src={`/game234/${item.resistance === 'fire' ? 'r' : item.resistance === 'storm' ? 'g' : 'b'}_e_1.png`}
+                      alt={item.name}
+                      style={{ width: '64px', height: '64px', display: 'block', margin: '0 auto 10px auto' }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: 13, lineHeight: 1.3, textAlign: 'center' }}>
                       抗性+{formatResistance(calculateTotalResistance(item))}
                     </Typography>
-                    <Box sx={{ mt: 1 }}>
+                    <Box sx={{ mt: 1.5 }}>
                       <LinearProgress
                         variant="determinate"
                         value={(item.exp / item.expToNextLevel) * 100}
-                        sx={{ height: 5, borderRadius: 5 }}
+                        sx={{ height: 8, borderRadius: 4 }}
                       />
-                      <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                      <Typography variant="caption" display="block" sx={{ mt: 0.6, fontSize: 12, textAlign: 'center' }}>
                         {item.exp}/{item.expToNextLevel}
                       </Typography>
                     </Box>
@@ -353,22 +294,24 @@ const EquipmentSelection = ({
                   key={item.id}
                   className={`option-card ${selectedEquipment.body?.id === item.id ? 'selected' : ''}`}
                   onClick={() => selectEquipment('body', item)}
-                  sx={{ width: 100, minHeight: 120 }}
+                  sx={{ width: 100, height: 170, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                 >
-                  <CardContent sx={{ p: 1 }}>
-                    <Typography variant="body2" fontWeight="bold">
-                      {item.name} Lv.{item.level}
-                    </Typography>
-                    <Typography variant="caption">
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <img
+                      src={`/game234/${item.resistance === 'fire' ? 'r' : item.resistance === 'storm' ? 'g' : 'b'}_e_2.png`}
+                      alt={item.name}
+                      style={{ width: '64px', height: '64px', display: 'block', margin: '0 auto 10px auto' }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: 13, lineHeight: 1.3, textAlign: 'center' }}>
                       抗性+{formatResistance(calculateTotalResistance(item))}
                     </Typography>
-                    <Box sx={{ mt: 1 }}>
+                    <Box sx={{ mt: 1.5 }}>
                       <LinearProgress
                         variant="determinate"
                         value={(item.exp / item.expToNextLevel) * 100}
-                        sx={{ height: 5, borderRadius: 5 }}
+                        sx={{ height: 8, borderRadius: 4 }}
                       />
-                      <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                      <Typography variant="caption" display="block" sx={{ mt: 0.6, fontSize: 12, textAlign: 'center' }}>
                         {item.exp}/{item.expToNextLevel}
                       </Typography>
                     </Box>
@@ -387,22 +330,24 @@ const EquipmentSelection = ({
                   key={item.id}
                   className={`option-card ${selectedEquipment.feet?.id === item.id ? 'selected' : ''}`}
                   onClick={() => selectEquipment('feet', item)}
-                  sx={{ width: 100, minHeight: 120 }}
+                  sx={{ width: 100, height: 170, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
                 >
-                  <CardContent sx={{ p: 1 }}>
-                    <Typography variant="body2" fontWeight="bold">
-                      {item.name} Lv.{item.level}
-                    </Typography>
-                    <Typography variant="caption">
+                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                    <img
+                      src={`/game234/${item.resistance === 'fire' ? 'r' : item.resistance === 'storm' ? 'g' : 'b'}_e_3.png`}
+                      alt={item.name}
+                      style={{ width: '64px', height: '64px', display: 'block', margin: '0 auto 10px auto' }}
+                    />
+                    <Typography variant="caption" sx={{ fontSize: 13, lineHeight: 1.3, textAlign: 'center' }}>
                       抗性+{formatResistance(calculateTotalResistance(item))}
                     </Typography>
-                    <Box sx={{ mt: 1 }}>
+                    <Box sx={{ mt: 1.5 }}>
                       <LinearProgress
                         variant="determinate"
                         value={(item.exp / item.expToNextLevel) * 100}
-                        sx={{ height: 5, borderRadius: 5 }}
+                        sx={{ height: 8, borderRadius: 4 }}
                       />
-                      <Typography variant="caption" display="block" sx={{ mt: 0.5 }}>
+                      <Typography variant="caption" display="block" sx={{ mt: 0.6, fontSize: 12, textAlign: 'center' }}>
                         {item.exp}/{item.expToNextLevel}
                       </Typography>
                     </Box>

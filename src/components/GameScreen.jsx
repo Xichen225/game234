@@ -163,7 +163,9 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
 
     // 计算实际伤害
     const baseDamage = cell.level * 12 * (3**cell.level);
-    let actualDamage = Math.max(0, (baseDamage - (resistance * 12)) * (1-(2**-Math.max(0,(8-resistance)))*resistance));
+    const immuneThreshold = cell.level * 3;
+    let actualDamage = baseDamage * Math.exp(-resistance / immuneThreshold);
+    if (resistance >= immuneThreshold) actualDamage = 0;
     actualDamage = Math.round(actualDamage);
 
     if (actualDamage > 0) {
@@ -316,56 +318,55 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
         </Box>
       </Box>
 
-      <Paper sx={{ p: 2, mb: 2}}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body1">
-            使用 W（上）S（下）A（左）D（右）键移动角色，到达终点。
-          </Typography>
-        </Box>
-      </Paper>
+      {/*<Paper sx={{ p: 2, mb: 2}}>*/}
+      {/*  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>*/}
+      {/*    <Typography variant="body1">*/}
+      {/*      使用 W（上）S（下）A（左）D（右）键移动角色，到达终点。*/}
+      {/*    </Typography>*/}
+      {/*  </Box>*/}
+      {/*</Paper>*/}
+      <Box>
+        <Paper sx={{ p: 2, px:10,backgroundColor:'rgba(246,246,246,0.5)'}}>
+          {/*<Typography variant="subtitle1" gutterBottom>装备与抗性：</Typography>*/}
+          {/*<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>*/}
+          {/*  <Typography variant="body2">*/}
+          {/*    头部：{selectedEquipment.head?.name || '无'}*/}
+          {/*    {selectedEquipment.head && ` Lv.${selectedEquipment.head.level}`}*/}
+          {/*  </Typography>*/}
+          {/*  <Typography variant="body2" sx={{ ml: 2 }}>*/}
+          {/*    身体：{selectedEquipment.body?.name || '无'}*/}
+          {/*    {selectedEquipment.body && ` Lv.${selectedEquipment.body.level}`}*/}
+          {/*  </Typography>*/}
+          {/*  <Typography variant="body2" sx={{ ml: 2 }}>*/}
+          {/*    足部：{selectedEquipment.feet?.name || '无'}*/}
+          {/*    {selectedEquipment.feet && ` Lv.${selectedEquipment.feet.level}`}*/}
+          {/*  </Typography>*/}
+          {/*</Box>*/}
 
-      {/* 游戏地图 */}
-      <Box sx={{display:'flex',padding:'24px'}}>
-        <Box sx={{mr:2}}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>装备与抗性：</Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-              <Typography variant="body2">
-                头部：{selectedEquipment.head?.name || '无'}
-                {selectedEquipment.head && ` Lv.${selectedEquipment.head.level}`}
-              </Typography>
-              <Typography variant="body2" sx={{ ml: 2 }}>
-                身体：{selectedEquipment.body?.name || '无'}
-                {selectedEquipment.body && ` Lv.${selectedEquipment.body.level}`}
-              </Typography>
-              <Typography variant="body2" sx={{ ml: 2 }}>
-                足部：{selectedEquipment.feet?.name || '无'}
-                {selectedEquipment.feet && ` Lv.${selectedEquipment.feet.level}`}
-              </Typography>
-            </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap',justifyContent:'space-between'}}>
+            <Chip
+                label={`炎热抗性：${formatResistance(playerResistances.fire)}`}
+                color={playerResistances.fire > 0 ? 'error' : 'default'}
+                variant={playerResistances.fire > 0 ? 'filled' : 'outlined'}
+                size="small"
+            />
+            <Chip
+                label={`风暴抗性：${formatResistance(playerResistances.storm)}`}
+                color={playerResistances.storm > 0 ? 'warning' : 'default'}
+                variant={playerResistances.storm > 0 ? 'filled' : 'outlined'}
+                size="small"
+            />
+            <Chip
+                label={`寒冰抗性：${formatResistance(playerResistances.ice)}`}
+                color={playerResistances.ice > 0 ? 'primary' : 'default'}
+                variant={playerResistances.ice > 0 ? 'filled' : 'outlined'}
+                size="small"
+            />
+          </Box>
+        </Paper>
+      </Box>
+      <Box sx={{display:'flex',padding:'24px',mt:2}}>
 
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              <Chip
-                  label={`炎热抗性：${formatResistance(playerResistances.fire)}`}
-                  color={playerResistances.fire > 0 ? 'error' : 'default'}
-                  variant={playerResistances.fire > 0 ? 'filled' : 'outlined'}
-                  size="small"
-              />
-              <Chip
-                  label={`风暴抗性：${formatResistance(playerResistances.storm)}`}
-                  color={playerResistances.storm > 0 ? 'warning' : 'default'}
-                  variant={playerResistances.storm > 0 ? 'filled' : 'outlined'}
-                  size="small"
-              />
-              <Chip
-                  label={`寒冰抗性：${formatResistance(playerResistances.ice)}`}
-                  color={playerResistances.ice > 0 ? 'primary' : 'default'}
-                  variant={playerResistances.ice > 0 ? 'filled' : 'outlined'}
-                  size="small"
-              />
-            </Box>
-          </Paper>
-        </Box>
         <Box className="game-map">
           {mapData.map((row, rowIndex) => (
               row.map((cell, colIndex) => (
@@ -373,14 +374,61 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
                       key={`${rowIndex}-${colIndex}`}
                       className={`real-map-cell ${getCellStyle(cell)}`}
                       elevation={1}
+                      style={{ position: 'relative', overflow: 'hidden', padding: 0 }}
                   >
-                    <span className="cell-content">{getCellContent(cell)}</span>
-                    <span className="cell-icon">{getCellIcon(cell)}</span>
-                    {playerPosition.row === rowIndex && playerPosition.col === colIndex && (
-                        <img src="/assets/113136114_p0.png" alt="player"
-                        style={{position:'absolute',width:'80px',height:'80px',borderRadius:'10px'}}/>
+                    {/* 玩家当前位置显示player.png，且优先级最高 */}
+                    {playerPosition.row === rowIndex && playerPosition.col === colIndex ? (
+                      <>
+                        {/* 如果当前位置是终点，先显示end.gif，再叠加player.png */}
+                        {cell.isEnd && (
+                          <img
+                            src="/game234/end.gif"
+                            alt="end"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', position: 'absolute', left: 0, top: 0, zIndex: 1 }}
+                          />
+                        )}
+                        <img
+                          src="/game234/player.png"
+                          alt="player"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', position: 'absolute', left: 0, top: 0, zIndex: 2 }}
+                        />
+                      </>
+                    ) : (
+                      // 非玩家当前位置
+                      <>
+                        {/* 终点显示end.gif */}
+                        {cell.isEnd && (
+                          <img
+                            src="/game234/end.gif"
+                            alt="end"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          />
+                        )}
+                        {/* 其他地块显示地块图片 */}
+                        {!(cell.isStart || cell.isEnd) && (
+                          <img
+                            src={`/game234/${cell.type === 'fire' ? 'r' : cell.type === 'storm' ? 'g' : 'b'}_p_${cell.level}.${cell.type === 'fire' ? (cell.level === 1 ? 'png' : 'gif') : (cell.level === 1 ? 'png' : 'gif')}`}
+                            alt={`${cell.type}${cell.level}`}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          />
+                        )}
+                      </>
                     )}
-                    {/*<img src="src/assets/IMG_1462.GIF" alt="123" style={{width:'110px', height:'110px'}}/>*/}
+                    {/* 玩家当前位置叠加一个边框高亮 */}
+                    {playerPosition.row === rowIndex && playerPosition.col === colIndex && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        border: '3px solid #4caf50',
+                        boxSizing: 'border-box',
+                        borderRadius: '10px',
+                        pointerEvents: 'none',
+                        zIndex: 10
+                      }} />
+                    )}
                   </Paper>
               ))
           ))}
@@ -390,9 +438,10 @@ const GameScreen = ({ selectedEquipment, mapData, returnToSelection, onGameVicto
       {/* 非侵入式伤害提示 */}
       <Snackbar
         open={damageAlert.open}
-        autoHideDuration={5000}
+        autoHideDuration={2000}
         onClose={handleCloseAlert}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{mt:6}}
       >
         <Alert onClose={handleCloseAlert} severity={damageAlert.severity} sx={{ width: '100%' }}>
           {damageAlert.message}

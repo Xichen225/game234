@@ -42,7 +42,6 @@
 }
 
 .game-container {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
@@ -53,18 +52,10 @@
   gap: 20px;
 }
 
-.equipment-section {
-  flex: 1;
-  padding: 20px;
+.equipment-section, .map-preview-section {
+  background-color: #FFF6E8 !important;
+  padding: 20px !important;
   border-radius: 10px;
-  background-color: #f5f5f5;
-}
-
-.map-preview-section {
-  flex: 1;
-  padding: 20px;
-  border-radius: 10px;
-  background-color: #f5f5f5;
 }
 
 .equipment-slot {
@@ -162,10 +153,18 @@
 .ice-3 { background-color: #6666ff; }
 
 .start-cell {
-  border: 2px solid #4caf50;
+  border: 2px solid #A7FF6E;
 }
 
 .end-cell {
-  border: 2px solid #f44336;
+  border: 2px solid #FFCA6C;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: url('/game234/bg.svg') no-repeat center center fixed;
+  background-size: cover;
 }
 

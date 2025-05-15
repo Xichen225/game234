@@ -13,6 +13,9 @@ const theme = createTheme({
     secondary: {
       main: '#dc004e',
     },
+    success: {
+      main:'#4caf50'
+    }
   },
 });
 
@@ -245,7 +248,7 @@ function App() {
         };
       case DIFFICULTY_LEVELS.EXPERT:
         return {
-          expReward: 120,
+          expReward: 150,
           levelProbabilities: [0.1, 0.3, 0.6],
         };
       default:
